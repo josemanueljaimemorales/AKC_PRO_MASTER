@@ -6,12 +6,8 @@ let currentDia = "";
 function setSemana(s){
   semana = s;
   document.getElementById("semana").innerText = "Semana: "+semana;
-
-  // recargar vista actual
-  if(currentTipo){
-    if(currentDia){
-      cargar(currentTipo, currentDia);
-    }
+  if(currentTipo && currentDia){
+    cargar(currentTipo, currentDia);
   }
 }
 
@@ -39,8 +35,12 @@ function menu(tipo){
     });
   }
 
-  if(tipo === "Preventivo" || tipo==="Orientacion"){
+  if(tipo === "Preventivo"){
     sub.innerHTML = `<button onclick="cargar('${tipo}','Jueves')">Jueves</button>`;
+  }
+
+  if(tipo === "Orientacion"){
+    sub.innerHTML = `<button onclick="cargarOrientacion()">Ver</button>`;
   }
 
   if(tipo === "Drill" || tipo === "F ESP APA"){
@@ -63,14 +63,18 @@ function cargar(tipo,dia){
     Number(e.Semana) === semana
   );
 
-  f.forEach(e=>{
-    cont.innerHTML += `
-    <div class="card" onclick="video('${e.Link}')">
-    <h3>${e.Ejercicio || ''}</h3>
-    <p>${e.Series || ''} x ${e.Reps || ''}</p>
-    <p>${e.Carga || e.Peso || ''}</p>
-    </div>`;
-  });
+  pintar(f);
+}
+
+function cargarOrientacion(){
+  let cont = document.getElementById("content");
+  cont.innerHTML = "";
+
+  let f = data.filter(e =>
+    limpiar(e.Tipo).includes("orient")
+  );
+
+  pintar(f);
 }
 
 function cargarA(tipo,aparato){
@@ -82,10 +86,17 @@ function cargarA(tipo,aparato){
     limpiar(e.Aparato) === limpiar(aparato)
   );
 
-  f.forEach(e=>{
+  pintar(f);
+}
+
+function pintar(lista){
+  let cont = document.getElementById("content");
+  lista.forEach(e=>{
     cont.innerHTML += `
     <div class="card" onclick="video('${e.Link}')">
     <h3>${e.Ejercicio || ''}</h3>
+    <p>${e.Series || ''} x ${e.Reps || ''}</p>
+    <p>${e.Carga || e.Peso || ''}</p>
     </div>`;
   });
 }
@@ -93,10 +104,12 @@ function cargarA(tipo,aparato){
 function video(link){
   if(!link) return;
   document.body.innerHTML = `
-  <button onclick="location.reload()">⬅️</button>
-  <iframe width="100%" height="80%" 
-  src="${link.replace('shorts/','embed/')}" 
-  frameborder="0" allowfullscreen></iframe>`;
+  <iframe 
+  src="${link.replace('shorts/','embed/')}?autoplay=1" 
+  style="position:fixed;top:0;left:0;width:100vw;height:100vh;border:none;"
+  allow="autoplay; fullscreen"
+  allowfullscreen>
+  </iframe>`;
 }
 
 loadExcel();
