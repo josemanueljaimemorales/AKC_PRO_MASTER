@@ -1,5 +1,18 @@
 let data = [];
 
+// ciclo 1-2-3-2
+function getSemana(){
+let d = new Date().getDate()%4;
+if(d===0) return 2;
+if(d===1) return 1;
+if(d===2) return 2;
+return 3;
+}
+
+let semana = getSemana();
+
+document.getElementById("semana").innerText = "Semana: "+semana;
+
 async function loadExcel(){
 const res = await fetch('AKC.xlsx');
 const buffer = await res.arrayBuffer();
@@ -34,7 +47,7 @@ sub.innerHTML += `<button onclick="cargarA('${tipo}','${a}')">${a}</button>`;
 }
 
 if(tipo === "Orientacion"){
-cargar("Orientacion");
+cargarOrientacion();
 }
 }
 
@@ -44,7 +57,8 @@ cont.innerHTML = "";
 
 let f = data.filter(e =>
 limpiar(e.Tipo) === limpiar(tipo) &&
-limpiar(e.Dia) === limpiar(dia)
+limpiar(e.Dia) === limpiar(dia) &&
+Number(e.Semana) === semana
 );
 
 f.forEach(e=>{
@@ -52,7 +66,7 @@ cont.innerHTML += `
 <div class="card" onclick="video('${e.Link}')">
 <h3>${e.Ejercicio || ''}</h3>
 <p>${e.Series || ''} x ${e.Reps || ''}</p>
-<p>${e.Carga || ''}</p>
+<p>${e.Carga || e.Peso || ''}</p>
 </div>
 `;
 });
@@ -65,6 +79,23 @@ cont.innerHTML = "";
 let f = data.filter(e =>
 limpiar(e.Tipo) === limpiar(tipo) &&
 limpiar(e.Aparato) === limpiar(aparato)
+);
+
+f.forEach(e=>{
+cont.innerHTML += `
+<div class="card" onclick="video('${e.Link}')">
+<h3>${e.Ejercicio || ''}</h3>
+</div>
+`;
+});
+}
+
+function cargarOrientacion(){
+let cont = document.getElementById("content");
+cont.innerHTML = "";
+
+let f = data.filter(e =>
+limpiar(e.Tipo) === "orientacion"
 );
 
 f.forEach(e=>{
