@@ -2,6 +2,7 @@ let data = [];
 let semana = 1;
 let currentTipo = "";
 let currentDia = "";
+let lastView = null;
 
 function setSemana(s){
   semana = s;
@@ -91,6 +92,7 @@ function cargarA(tipo,aparato){
 
 function pintar(lista){
   let cont = document.getElementById("content");
+  cont.innerHTML = "";
   lista.forEach(e=>{
     cont.innerHTML += `
     <div class="card" onclick="video('${e.Link}')">
@@ -103,13 +105,25 @@ function pintar(lista){
 
 function video(link){
   if(!link) return;
+
+  // guardar estado anterior
+  lastView = document.body.innerHTML;
+
   document.body.innerHTML = `
+  <div style="position:fixed;top:10px;left:10px;z-index:9999;">
+    <button onclick="volver()" style="padding:10px;border-radius:10px;background:black;color:white;">⬅️</button>
+  </div>
+
   <iframe 
   src="${link.replace('shorts/','embed/')}?autoplay=1" 
   style="position:fixed;top:0;left:0;width:100vw;height:100vh;border:none;"
   allow="autoplay; fullscreen"
   allowfullscreen>
   </iframe>`;
+}
+
+function volver(){
+  document.body.innerHTML = lastView;
 }
 
 loadExcel();
