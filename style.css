@@ -1,5 +1,62 @@
 body{background:#0b0b0b;color:white;text-align:center;font-family:Arial;}
-.logo{width:120px;margin-top:20px;}
-button{margin:8px;padding:12px;border-radius:12px;background:#1c1c1c;color:white;border:none;font-size:14px;}
-.card{background:#1a1a1a;margin:12px;padding:20px;border-radius:15px;}
-.semanas button{background:#333;}
+.logo{width:140px;margin-top:20px;}
+
+button{
+margin:10px;
+padding:18px;
+border-radius:16px;
+background:#1c1c1c;
+color:white;
+border:none;
+font-size:16px;
+}
+
+.big-btn{
+width:80%;
+font-size:18px;
+padding:20px;
+}
+
+.menu button{
+width:45%;
+font-size:18px;
+padding:20px;
+}
+
+.card{
+background:#1a1a1a;
+margin:16px;
+padding:25px;
+border-radius:20px;
+font-size:18px;
+}
+
+.semanas button{
+background:#333;
+width:60px;
+height:60px;
+font-size:18px;
+}
+
+.back-btn{
+position:fixed;
+top:15px;
+left:15px;
+z-index:9999;
+}
+
+.back-btn button{
+padding:18px 22px;
+font-size:20px;
+border-radius:14px;
+background:black;
+}
+
+.video-full{
+position:fixed;
+top:0;
+left:0;
+width:100vw;
+height:100vh;
+border:none;
+}

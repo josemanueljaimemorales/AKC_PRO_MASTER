@@ -32,21 +32,21 @@ function menu(tipo){
 
   if(tipo === "Fuerza"){
     ["Lunes","Miercoles","Viernes"].forEach(d=>{
-      sub.innerHTML += `<button onclick="cargar('${tipo}','${d}')">${d}</button>`;
+      sub.innerHTML += `<button class="big-btn" onclick="cargar('${tipo}','${d}')">${d}</button>`;
     });
   }
 
   if(tipo === "Preventivo"){
-    sub.innerHTML = `<button onclick="cargar('${tipo}','Jueves')">Jueves</button>`;
+    sub.innerHTML = `<button class="big-btn" onclick="cargar('${tipo}','Jueves')">Jueves</button>`;
   }
 
   if(tipo === "Orientacion"){
-    sub.innerHTML = `<button onclick="cargarOrientacion()">Ver</button>`;
+    sub.innerHTML = `<button class="big-btn" onclick="cargarOrientacion()">Ver</button>`;
   }
 
   if(tipo === "Drill" || tipo === "F ESP APA"){
     ["Piso","Arzon","Anillos","Salto","Paralelas","Barra"].forEach(a=>{
-      sub.innerHTML += `<button onclick="cargarA('${tipo}','${a}')">${a}</button>`;
+      sub.innerHTML += `<button class="big-btn" onclick="cargarA('${tipo}','${a}')">${a}</button>`;
     });
   }
 }
@@ -96,7 +96,7 @@ function pintar(lista){
   lista.forEach(e=>{
     cont.innerHTML += `
     <div class="card" onclick="video('${e.Link}')">
-    <h3>${e.Ejercicio || ''}</h3>
+    <h2>${e.Ejercicio || ''}</h2>
     <p>${e.Series || ''} x ${e.Reps || ''}</p>
     <p>${e.Carga || e.Peso || ''}</p>
     </div>`;
@@ -106,17 +106,16 @@ function pintar(lista){
 function video(link){
   if(!link) return;
 
-  // guardar estado anterior
   lastView = document.body.innerHTML;
 
   document.body.innerHTML = `
-  <div style="position:fixed;top:10px;left:10px;z-index:9999;">
-    <button onclick="volver()" style="padding:10px;border-radius:10px;background:black;color:white;">⬅️</button>
+  <div class="back-btn">
+    <button onclick="volver()">⬅️</button>
   </div>
 
   <iframe 
   src="${link.replace('shorts/','embed/')}?autoplay=1" 
-  style="position:fixed;top:0;left:0;width:100vw;height:100vh;border:none;"
+  class="video-full"
   allow="autoplay; fullscreen"
   allowfullscreen>
   </iframe>`;
