@@ -44,7 +44,7 @@ cont.innerHTML = "";
 
 let f = data.filter(e =>
 limpiar(e.Tipo) === limpiar(tipo) &&
-(dia ? limpiar(e.Dia) === limpiar(dia) : true)
+limpiar(e.Dia) === limpiar(dia)
 );
 
 f.forEach(e=>{
@@ -77,6 +77,7 @@ cont.innerHTML += `
 }
 
 function video(link){
+if(!link) return;
 document.body.innerHTML = `
 <button onclick="location.reload()">⬅️</button>
 <iframe width="100%" height="80%" 
