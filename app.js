@@ -82,13 +82,34 @@ document.getElementById('app').innerHTML=
 items.map((r,i)=>`<button class="btn" onclick="video('${encodeURIComponent(r.Video||"")}')">${r.Ejercicio||r.Nombre||"Ejercicio"}</button>`).join('');
 }
 
+function convertir(url){
+if(!url) return "";
+// limpiar params
+url=url.split("&")[0];
+
+// shorts
+if(url.includes("shorts")){
+return "https://www.youtube.com/embed/"+url.split("shorts/")[1];
+}
+
+// watch
+if(url.includes("watch?v=")){
+return "https://www.youtube.com/embed/"+url.split("watch?v=")[1];
+}
+
+// ya embed
+if(url.includes("embed")) return url;
+
+return url;
+}
+
 function video(u){
-let url=decodeURIComponent(u);
-if(url.includes("shorts")) url=url.replace("shorts/","embed/");
-if(url.includes("watch?v=")) url=url.replace("watch?v=","embed/");
+let raw=decodeURIComponent(u);
+let url=convertir(raw);
+
 document.getElementById('app').innerHTML=`
 <button class="back" onclick="home()">⬅</button>
-<iframe style="width:100%;height:80vh;border:none" src="${url}" allowfullscreen></iframe>`;
+<iframe class="video" src="${url}" allowfullscreen allow="autoplay"></iframe>`;
 }
 
 init();
