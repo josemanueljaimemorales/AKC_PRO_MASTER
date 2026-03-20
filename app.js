@@ -1,63 +1,94 @@
-
 let data=[];
 
 async function init(){
 const res=await fetch('AKC.xlsx');
 const buf=await res.arrayBuffer();
 const wb=XLSX.read(buf);
-data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
 home();
 }
 
 function home(){
 document.getElementById('app').innerHTML=`
-<h2>AKC</h2>
-<button class="btn" onclick="menu('fuerza')">💪 Fuerza</button>
-<button class="btn" onclick="menu('orientacion')">🧭 Orientación</button>
-<button class="btn" onclick="menu('preventivo')">🛡 Preventivo</button>
-<button class="btn" onclick="menu('drill')">⚙ Drill</button>
-<button class="btn" onclick="menu('fesp')">🏋 Fuerza Esp Aparato</button>
-`;
+<button class="btn" onclick="fuerza()">💪 Fuerza</button>
+<button class="btn" onclick="preventivo()">🛡 Preventivo</button>
+<button class="btn" onclick="orientacion()">🧭 Orientación</button>
+<button class="btn" onclick="drill()">⚙ Drill</button>
+<button class="btn" onclick="fesp()">🏋 F ESP APA</button>`;
 }
 
-function menu(tipo){
-let lista=data.filter(r=>{
-let t=(r.Tipo||"").toString().toLowerCase();
-if(tipo==="orientacion") return t.includes("orient");
-if(tipo==="fuerza") return t.includes("fuerza");
-if(tipo==="preventivo") return t.includes("prevent");
-if(tipo==="drill") return t.includes("drill");
-if(tipo==="fesp") return t.includes("esp");
-});
-
-if(lista.length===0){
-document.getElementById('app').innerHTML=`<button class="back" onclick="home()">⬅</button>No hay datos`;
-return;
-}
-
+function fuerza(){
 document.getElementById('app').innerHTML=`
 <button class="back" onclick="home()">⬅</button>
-${lista.map((r,i)=>`<button class="btn" onclick="ver(${i},'${tipo}')">${r.Nombre}</button>`).join('')}
-`;
-window.current=lista;
+<button class="btn" onclick="dias('1')">Semana 1</button>
+<button class="btn" onclick="dias('2')">Semana 2</button>
+<button class="btn" onclick="dias('3')">Semana 3</button>`;
 }
 
-function convertir(url){
-if(!url) return "";
-if(url.includes("shorts")){
-return url.replace("shorts/","embed/");
-}
-return url.replace("watch?v=","embed/");
-}
-
-function ver(i,tipo){
-let r=window.current[i];
-let url=convertir(r.Video||r.Link||"");
-
+function dias(sem){
+window.sem=sem;
 document.getElementById('app').innerHTML=`
-<button class="back" onclick="menu('${tipo}')">⬅ Regresar</button>
-<iframe class="video" src="${url}" allowfullscreen autoplay></iframe>
-`;
+<button class="back" onclick="fuerza()">⬅</button>
+<button class="btn" onclick="lista('Fuerza','Lunes')">Lunes</button>
+<button class="btn" onclick="lista('Fuerza','Miercoles')">Miércoles</button>
+<button class="btn" onclick="lista('Fuerza','Viernes')">Viernes</button>`;
+}
+
+function preventivo(){
+document.getElementById('app').innerHTML=`
+<button class="back" onclick="home()">⬅</button>
+<button class="btn" onclick="listaPrev('1')">Semana 1</button>
+<button class="btn" onclick="listaPrev('2')">Semana 2</button>
+<button class="btn" onclick="listaPrev('3')">Semana 3</button>`;
+}
+
+function listaPrev(sem){
+let items=data.filter(r=>r.Tipo==="Preventivo" && r.Semana==sem);
+mostrar(items,"preventivo");
+}
+
+function orientacion(){
+let items=data.filter(r=>(r.Tipo||"").toLowerCase().includes("orient"));
+mostrar(items,"orientacion");
+}
+
+function drill(){
+let aparatos=[...new Set(data.filter(r=>r.Tipo==="Drill").map(r=>r.Aparato))];
+document.getElementById('app').innerHTML=
+`<button class="back" onclick="home()">⬅</button>`+
+aparatos.map(a=>`<button class="btn" onclick="listaA('Drill','${a}')">${a}</button>`).join('');
+}
+
+function fesp(){
+let aparatos=[...new Set(data.filter(r=>r.Tipo==="F ESP APA").map(r=>r.Aparato))];
+document.getElementById('app').innerHTML=
+`<button class="back" onclick="home()">⬅</button>`+
+aparatos.map(a=>`<button class="btn" onclick="listaA('F ESP APA','${a}')">${a}</button>`).join('');
+}
+
+function lista(tipo,dia){
+let items=data.filter(r=>r.Tipo===tipo && r.Semana==window.sem && r.Dia===dia);
+mostrar(items,tipo);
+}
+
+function listaA(tipo,aparato){
+let items=data.filter(r=>r.Tipo===tipo && r.Aparato===aparato);
+mostrar(items,tipo);
+}
+
+function mostrar(items,back){
+document.getElementById('app').innerHTML=
+`<button class="back" onclick="home()">⬅</button>`+
+items.map((r,i)=>`<button class="btn" onclick="video('${encodeURIComponent(r.Video||"")}')">${r.Ejercicio||r.Nombre||"Ejercicio"}</button>`).join('');
+}
+
+function video(u){
+let url=decodeURIComponent(u);
+if(url.includes("shorts")) url=url.replace("shorts/","embed/");
+if(url.includes("watch?v=")) url=url.replace("watch?v=","embed/");
+document.getElementById('app').innerHTML=`
+<button class="back" onclick="home()">⬅</button>
+<iframe style="width:100%;height:80vh;border:none" src="${url}" allowfullscreen></iframe>`;
 }
 
 init();
