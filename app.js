@@ -1,4 +1,5 @@
 let data=[];
+let listaActual=[];
 
 async function init(){
 const res=await fetch('AKC.xlsx');
@@ -8,44 +9,13 @@ data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
 home();
 }
 
-function getLink(r){
-return r.Video || r.LINK || r.Link || r.video || r.link || "";
-}
-
-function convertir(url){
-if(!url) return "";
-url=url.split("?")[0];
-
-if(url.includes("shorts")){
-return "https://www.youtube.com/embed/"+url.split("shorts/")[1];
-}
-if(url.includes("watch?v=")){
-return "https://www.youtube.com/embed/"+url.split("watch?v=")[1];
-}
-if(url.includes("embed")){
-return url;
-}
-return "";
-}
-
-function video(u){
-let raw=decodeURIComponent(u);
-let url=convertir(raw);
-
-if(!url){
-alert("Link inválido o vacío");
-return;
-}
-
+function home(){
 document.getElementById('app').innerHTML=`
-<button class="back" onclick="home()">⬅</button>
-<iframe class="video" src="${url}" allowfullscreen></iframe>`;
-}
-
-function mostrar(items){
-document.getElementById('app').innerHTML=
-`<button class="back" onclick="home()">⬅</button>`+
-items.map(r=>`<button class="btn" onclick="video('${encodeURIComponent(getLink(r))}')">${r.Ejercicio||r.Nombre||"Ejercicio"}</button>`).join('');
+<button class="btn" onclick="fuerza()">💪 Fuerza</button>
+<button class="btn" onclick="preventivo()">🛡 Preventivo</button>
+<button class="btn" onclick="orientacion()">🧭 Orientación</button>
+<button class="btn" onclick="drill()">⚙ Drill</button>
+<button class="btn" onclick="fesp()">🏋 F ESP APA</button>`;
 }
 
 function fuerza(){
@@ -60,12 +30,12 @@ function dias(sem){
 window.sem=sem;
 document.getElementById('app').innerHTML=`
 <button class="back" onclick="fuerza()">⬅</button>
-<button class="btn" onclick="lista('Lunes')">Lunes</button>
-<button class="btn" onclick="lista('Miercoles')">Miércoles</button>
-<button class="btn" onclick="lista('Viernes')">Viernes</button>`;
+<button class="btn" onclick="lista('Fuerza','Lunes')">Lunes</button>
+<button class="btn" onclick="lista('Fuerza','Miercoles')">Miércoles</button>
+<button class="btn" onclick="lista('Fuerza','Viernes')">Viernes</button>`;
 }
 
-function lista(dia){
+function lista(tipo,dia){
 let items=data.filter(r=>r.Tipo==="Fuerza" && r.Semana==window.sem && r.Dia===dia);
 mostrar(items);
 }
@@ -107,13 +77,42 @@ let items=data.filter(r=>r.Tipo===tipo && r.Aparato===aparato);
 mostrar(items);
 }
 
-function home(){
+function mostrar(items){
+listaActual = items;
+document.getElementById('app').innerHTML=
+`<button class="back" onclick="home()">⬅</button>`+
+items.map((r,i)=>`<button class="btn" onclick="video(${i})">${r.Ejercicio||r.Nombre||"Ejercicio"}</button>`).join('');
+}
+
+function convertir(raw){
+if(!raw) return "";
+raw = raw.split("?")[0];
+
+if(raw.includes("shorts")){
+return "https://www.youtube.com/embed/"+raw.split("shorts/")[1];
+}
+if(raw.includes("watch?v=")){
+return "https://www.youtube.com/embed/"+raw.split("watch?v=")[1];
+}
+if(raw.includes("embed")){
+return raw;
+}
+return "";
+}
+
+function video(i){
+let r = listaActual[i];
+let raw = r.Video || r.Link || r.LINK || r.video || r.link || "";
+let url = convertir(raw);
+
+if(!url){
+alert("Video no válido");
+return;
+}
+
 document.getElementById('app').innerHTML=`
-<button class="btn" onclick="fuerza()">💪 Fuerza</button>
-<button class="btn" onclick="preventivo()">🛡 Preventivo</button>
-<button class="btn" onclick="orientacion()">🧭 Orientación</button>
-<button class="btn" onclick="drill()">⚙ Drill</button>
-<button class="btn" onclick="fesp()">🏋 F ESP APA</button>`;
+<button class="back" onclick="home()">⬅</button>
+<iframe class="video" src="${url}" allowfullscreen></iframe>`;
 }
 
 init();
