@@ -3,33 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<title>AKC</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-
 <img src="logo.png" class="logo">
 <h1>AKC</h1>
-
-<div class="semanas">
-<button onclick="setSemana(1)">1</button>
-<button onclick="setSemana(2)">2</button>
-<button onclick="setSemana(3)">3</button>
-</div>
-
-<h3 id="semana">Semana: 1</h3>
-
-<div class="menu">
-<button onclick="menu('Fuerza')">💪<br>Fuerza</button>
-<button onclick="menu('Preventivo')">🛡️<br>Preventivo</button>
-<button onclick="menu('Drill')">⚙️<br>Drill</button>
-<button onclick="menu('Orientacion')">🧭<br>Orientacion</button>
-<button onclick="menu('F ESP APA')">🏋️<br>F Esp</button>
-</div>
-
-<div id="sub"></div>
-<div id="content"></div>
-
+<div id="app"></div>
 <script src="app.js"></script>
 </body>
 </html>

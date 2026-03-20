@@ -1,128 +1,46 @@
-let data = [];
-let semana = 1;
-let currentTipo = "";
-let currentDia = "";
-let lastView = null;
+let wb,data=[],state={view:'home',type:null,day:null};
 
-function setSemana(s){
-  semana = s;
-  document.getElementById("semana").innerText = "Semana: "+semana;
-  if(currentTipo && currentDia){
-    cargar(currentTipo, currentDia);
-  }
+async function init(){
+const res=await fetch('AKC.xlsx');
+const buf=await res.arrayBuffer();
+wb=XLSX.read(buf);
+data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+render();
 }
 
-async function loadExcel(){
-  const res = await fetch('AKC.xlsx');
-  const buffer = await res.arrayBuffer();
-  const wb = XLSX.read(buffer);
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  data = XLSX.utils.sheet_to_json(sheet);
+function nav(view,p={}){state={...state,...p,view};render();}
+
+function header(t){return `<div class="header"><button class="back" onclick="nav('home')">⬅</button><div>${t}</div><div></div></div>`;}
+
+function render(){
+let app=document.getElementById('app');
+
+if(state.view==='home'){
+app.innerHTML=`
+<button class="btn" onclick="nav('days',{type:'Fuerza'})">💪 Fuerza</button>
+<button class="btn" onclick="nav('days',{type:'Preventivo'})">🛡 Preventivo</button>
+<button class="btn" onclick="nav('days',{type:'Drill'})">⚙ Drill</button>
+<button class="btn" onclick="nav('days',{type:'Orientacion'})">🧭 Orientación</button>`;
 }
 
-function limpiar(v){
-  return (v || "").toString().trim().toLowerCase();
+if(state.view==='days'){
+app.innerHTML=header(state.type)+`
+<button class="btn" onclick="nav('list',{day:'Lunes'})">Lunes</button>
+<button class="btn" onclick="nav('list',{day:'Miercoles'})">Miércoles</button>
+<button class="btn" onclick="nav('list',{day:'Viernes'})">Viernes</button>`;
 }
 
-function menu(tipo){
-  currentTipo = tipo;
-  let sub = document.getElementById("sub");
-  sub.innerHTML = "";
-  document.getElementById("content").innerHTML = "";
-
-  if(tipo === "Fuerza"){
-    ["Lunes","Miercoles","Viernes"].forEach(d=>{
-      sub.innerHTML += `<button class="big-btn" onclick="cargar('${tipo}','${d}')">${d}</button>`;
-    });
-  }
-
-  if(tipo === "Preventivo"){
-    sub.innerHTML = `<button class="big-btn" onclick="cargar('${tipo}','Jueves')">Jueves</button>`;
-  }
-
-  if(tipo === "Orientacion"){
-    sub.innerHTML = `<button class="big-btn" onclick="cargarOrientacion()">Ver</button>`;
-  }
-
-  if(tipo === "Drill" || tipo === "F ESP APA"){
-    ["Piso","Arzon","Anillos","Salto","Paralelas","Barra"].forEach(a=>{
-      sub.innerHTML += `<button class="big-btn" onclick="cargarA('${tipo}','${a}')">${a}</button>`;
-    });
-  }
+if(state.view==='list'){
+let items=data.filter(r=>(r.Tipo||'').includes(state.type)&&(r.Dia||'').includes(state.day));
+app.innerHTML=header(state.type+" "+state.day)+items.map(r=>`
+<button class="btn" onclick="video('${encodeURIComponent(r.Video||'')}')">${r.Ejercicio||''}</button>`).join('');
+}
 }
 
-function cargar(tipo,dia){
-  currentTipo = tipo;
-  currentDia = dia;
-
-  let cont = document.getElementById("content");
-  cont.innerHTML = "";
-
-  let f = data.filter(e =>
-    limpiar(e.Tipo).includes(limpiar(tipo)) &&
-    limpiar(e.Dia) === limpiar(dia) &&
-    Number(e.Semana) === semana
-  );
-
-  pintar(f);
+function video(u){
+let url=decodeURIComponent(u);
+document.getElementById('app').innerHTML=header('Video')+`
+<iframe src="${url.replace('shorts/','embed/').replace('watch?v=','embed/')}" style="width:100%;height:70vh;border:none"></iframe>`;
 }
 
-function cargarOrientacion(){
-  let cont = document.getElementById("content");
-  cont.innerHTML = "";
-
-  let f = data.filter(e =>
-    limpiar(e.Tipo).includes("orient")
-  );
-
-  pintar(f);
-}
-
-function cargarA(tipo,aparato){
-  let cont = document.getElementById("content");
-  cont.innerHTML = "";
-
-  let f = data.filter(e =>
-    limpiar(e.Tipo).includes(limpiar(tipo)) &&
-    limpiar(e.Aparato) === limpiar(aparato)
-  );
-
-  pintar(f);
-}
-
-function pintar(lista){
-  let cont = document.getElementById("content");
-  cont.innerHTML = "";
-  lista.forEach(e=>{
-    cont.innerHTML += `
-    <div class="card" onclick="video('${e.Link}')">
-    <h2>${e.Ejercicio || ''}</h2>
-    <p>${e.Series || ''} x ${e.Reps || ''}</p>
-    <p>${e.Carga || e.Peso || ''}</p>
-    </div>`;
-  });
-}
-
-function video(link){
-  if(!link) return;
-
-  lastView = document.body.innerHTML;
-
-  document.body.innerHTML = `
-  <div class="back-btn">
-    <button onclick="volver()">⬅️</button>
-  </div>
-
-  <iframe 
-  src="${link.replace('shorts/','embed/')}?autoplay=1" 
-  class="video-full"
-  allow="autoplay; fullscreen"
-  allowfullscreen>
-  </iframe>`;
-}
-
-function volver(){
-  document.body.innerHTML = lastView;
-}
-
-loadExcel();
+init();
