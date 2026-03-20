@@ -12,12 +12,5 @@ body{background:#0b0b0b;color:#fff;font-family:Arial;margin:0;text-align:center}
   width:90%;
   text-align:left;
 }
-.titulo{
-  font-size:18px;
-  font-weight:bold;
-}
-.info{
-  margin-top:5px;
-  color:#00ff9c;
-  font-size:14px;
-}
+.titulo{font-size:18px;font-weight:bold;}
+.info{margin-top:5px;color:#00ff9c;font-size:14px;}

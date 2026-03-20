@@ -6,9 +6,9 @@ fetch('AKC.xlsx')
 .then(data => {
     const workbook = XLSX.read(data);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const dataJson = XLSX.utils.sheet_to_json(sheet);
+    const json = XLSX.utils.sheet_to_json(sheet);
 
-    dataGlobal = dataJson.map(row => ({
+    dataGlobal = json.map(row => ({
         tipo: row["Tipo"],
         dia: row["Día"],
         semana: row["Semana"],
@@ -19,24 +19,41 @@ fetch('AKC.xlsx')
         video: row["Video"]
     }));
 
-    renderHome();
+    home();
 });
 
-function renderHome(){
-    const app = document.getElementById("app");
-    app.innerHTML = `
-        <button class="btn" onclick="verFuerza()">💪 Fuerza</button>
+function home(){
+    document.getElementById("app").innerHTML = `
+        <button class="btn" onclick="verSemanas()">💪 Fuerza</button>
     `;
 }
 
-function verFuerza(){
-    const app = document.getElementById("app");
+function verSemanas(){
+    let html = `<div class="back" onclick="home()">⬅</div>`;
+    [1,2,3].forEach(s=>{
+        html += `<button class="btn" onclick="verDias(${s})">Semana ${s}</button>`;
+    });
+    document.getElementById("app").innerHTML = html;
+}
 
-    const ejercicios = dataGlobal.filter(e => e.tipo === "Fuerza");
+function verDias(semana){
+    let html = `<div class="back" onclick="verSemanas()">⬅</div>`;
+    ["Lunes","Miércoles","Viernes"].forEach(d=>{
+        html += `<button class="btn" onclick="verEjercicios(${semana}, '${d}')">${d}</button>`;
+    });
+    document.getElementById("app").innerHTML = html;
+}
 
-    let html = `<div class="back" onclick="renderHome()">⬅</div>`;
+function verEjercicios(semana, dia){
+    let lista = dataGlobal.filter(e =>
+        e.tipo === "Fuerza" &&
+        e.semana == semana &&
+        e.dia === dia
+    );
 
-    ejercicios.forEach(e => {
+    let html = `<div class="back" onclick="verDias(${semana})">⬅</div>`;
+
+    lista.forEach(e=>{
         html += `
         <div class="card" onclick="verVideo('${e.video}')">
             <div class="titulo">${e.nombre || ""}</div>
@@ -49,13 +66,12 @@ function verFuerza(){
         `;
     });
 
-    app.innerHTML = html;
+    document.getElementById("app").innerHTML = html;
 }
 
 function verVideo(url){
-    const app = document.getElementById("app");
-    app.innerHTML = `
-        <div class="back" onclick="verFuerza()">⬅</div>
+    document.getElementById("app").innerHTML = `
+        <div class="back" onclick="verSemanas()">⬅</div>
         <iframe class="video" src="${url}" allowfullscreen></iframe>
     `;
 }
