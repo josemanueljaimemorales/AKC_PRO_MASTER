@@ -1,130 +1,127 @@
+let data=[];
+let listaActual=[];
 
-let dataGlobal = [];
-
-fetch('AKC.xlsx')
-.then(res => res.arrayBuffer())
-.then(data => {
-    const workbook = XLSX.read(data);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet);
-
-    dataGlobal = json.map(row => ({
-        tipo: row["Tipo"],
-        dia: row["Día"],
-        semana: row["Semana"],
-        aparato: row["Aparato"],
-        nombre: row["Ejercicio"],
-        series: row["Series"],
-        reps: row["Reps"],
-        peso: row["Peso"],
-        video: row["Video"] || row["VIDEO"] || row["link"] || ""
-    }));
-
-    home();
-});
+async function init(){
+const res=await fetch('AKC.xlsx');
+const buf=await res.arrayBuffer();
+const wb=XLSX.read(buf);
+data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+home();
+}
 
 function home(){
-    document.getElementById("app").innerHTML = `
-        <button class="btn" onclick="verFuerza()">💪 Fuerza</button>
-        <button class="btn" onclick="verPreventivo()">🛡 Preventivo</button>
-        <button class="btn" onclick="verOrientacion()">🧭 Orientación</button>
-        <button class="btn" onclick="verDrill()">🔁 Drill</button>
-        <button class="btn" onclick="verFES()">⚡ F Esp APA</button>
-    `;
+document.getElementById('app').innerHTML=`
+<button class="btn" onclick="fuerza()">💪 Fuerza</button>
+<button class="btn" onclick="preventivo()">🛡 Preventivo</button>
+<button class="btn" onclick="orientacion()">🧭 Orientación</button>
+<button class="btn" onclick="drill()">⚙ Drill</button>
+<button class="btn" onclick="fesp()">🏋 F ESP APA</button>`;
 }
 
-// ================= FUERZA =================
-function verFuerza(){
-    let html = `<div class="back" onclick="home()">⬅</div>`;
-    [1,2,3].forEach(s=>{
-        html += `<button class="btn" onclick="verDias(${s})">Semana ${s}</button>`;
-    });
-    document.getElementById("app").innerHTML = html;
+function fuerza(){
+document.getElementById('app').innerHTML=`
+<button class="back" onclick="home()">⬅</button>
+<button class="btn" onclick="dias('1')">Semana 1</button>
+<button class="btn" onclick="dias('2')">Semana 2</button>
+<button class="btn" onclick="dias('3')">Semana 3</button>`;
 }
 
-function verDias(semana){
-    let html = `<div class="back" onclick="verFuerza()">⬅</div>`;
-    ["Lunes","Miércoles","Viernes"].forEach(d=>{
-        html += `<button class="btn" onclick="verEjercicios(${semana}, '${d}')">${d}</button>`;
-    });
-    document.getElementById("app").innerHTML = html;
+function dias(sem){
+window.sem=sem;
+document.getElementById('app').innerHTML=`
+<button class="back" onclick="fuerza()">⬅</button>
+<button class="btn" onclick="lista('Fuerza','Lunes')">Lunes</button>
+<button class="btn" onclick="lista('Fuerza','Miercoles')">Miércoles</button>
+<button class="btn" onclick="lista('Fuerza','Viernes')">Viernes</button>`;
 }
 
-function verEjercicios(semana, dia){
-    let lista = dataGlobal.filter(e =>
-        e.tipo === "Fuerza" &&
-        e.semana == semana &&
-        e.dia === dia
-    );
-
-    renderLista(lista, () => verDias(semana));
+function lista(tipo,dia){
+let items=data.filter(r=>r.Tipo==="Fuerza" && r.Semana==window.sem && r.Dia===dia);
+mostrar(items);
 }
 
-// ================= PREVENTIVO =================
-function verPreventivo(){
-    let html = `<div class="back" onclick="home()">⬅</div>`;
-    [1,2,3].forEach(s=>{
-        html += `<button class="btn" onclick="verPreventivoLista(${s})">Semana ${s}</button>`;
-    });
-    document.getElementById("app").innerHTML = html;
+function preventivo(){
+document.getElementById('app').innerHTML=`
+<button class="back" onclick="home()">⬅</button>
+<button class="btn" onclick="listaPrev('1')">Semana 1</button>
+<button class="btn" onclick="listaPrev('2')">Semana 2</button>
+<button class="btn" onclick="listaPrev('3')">Semana 3</button>`;
 }
 
-function verPreventivoLista(semana){
-    let lista = dataGlobal.filter(e =>
-        e.tipo === "Preventivo" &&
-        e.semana == semana
-    );
-
-    renderLista(lista, verPreventivo);
+function listaPrev(sem){
+let items=data.filter(r=>r.Tipo==="Preventivo" && r.Semana==sem);
+mostrar(items);
 }
 
-// ================= ORIENTACION =================
-function verOrientacion(){
-    let lista = dataGlobal.filter(e => e.tipo === "Orientacion");
-    renderLista(lista, home);
+function orientacion(){
+let items=data.filter(r=>(r.Tipo||"").toLowerCase().includes("orient"));
+mostrar(items);
 }
 
-// ================= DRILL =================
-function verDrill(){
-    let lista = dataGlobal.filter(e => e.tipo === "Drill");
-    renderLista(lista, home);
+function drill(){
+let aparatos=[...new Set(data.filter(r=>r.Tipo==="Drill").map(r=>r.Aparato))];
+document.getElementById('app').innerHTML=
+`<button class="back" onclick="home()">⬅</button>`+
+aparatos.map(a=>`<button class="btn" onclick="listaA('Drill','${a}')">${a}</button>`).join('');
 }
 
-// ================= FES =================
-function verFES(){
-    let lista = dataGlobal.filter(e => e.tipo === "F Esp APA");
-    renderLista(lista, home);
+function fesp(){
+let aparatos=[...new Set(data.filter(r=>r.Tipo==="F ESP APA").map(r=>r.Aparato))];
+document.getElementById('app').innerHTML=
+`<button class="back" onclick="home()">⬅</button>`+
+aparatos.map(a=>`<button class="btn" onclick="listaA('F ESP APA','${a}')">${a}</button>`).join('');
 }
 
-// ================= RENDER =================
-function renderLista(lista, backFn){
-    let html = `<div class="back" onclick="(${backFn})()">⬅</div>`;
-
-    lista.forEach(e=>{
-        html += `
-        <div class="btn" onclick="verVideo('${e.video}')">
-            ${e.nombre || ""}
-            <div class="info">
-                ${e.series ? "Series: " + e.series : ""}
-                ${e.reps ? " | Reps: " + e.reps : ""}
-                ${e.peso ? " | Peso: " + e.peso : ""}
-            </div>
-        </div>
-        `;
-    });
-
-    document.getElementById("app").innerHTML = html;
+function listaA(tipo,aparato){
+let items=data.filter(r=>r.Tipo===tipo && r.Aparato===aparato);
+mostrar(items);
 }
 
-// ================= VIDEO =================
-function verVideo(url){
-    if(!url){
-        alert("Este ejercicio no tiene video (revisa columna Video en Excel)");
-        return;
-    }
-
-    document.getElementById("app").innerHTML = `
-        <div class="back" onclick="home()">⬅</div>
-        <iframe class="video" src="${url}" allowfullscreen></iframe>
-    `;
+function mostrar(items){
+listaActual = items;
+document.getElementById('app').innerHTML=
+`<button class="back" onclick="home()">⬅</button>`+
+items.map((r,i)=>`
+<button class="btn" onclick="video(${i})">
+${r.Ejercicio||r.Nombre||"Ejercicio"}
+<div class="info">
+${r.Series ? "Series: "+r.Series : ""}
+${r.Reps ? " | Reps: "+r.Reps : ""}
+${r.Peso ? " | Peso: "+r.Peso : ""}
+</div>
+</button>
+`).join('');
 }
+
+function convertir(raw){
+if(!raw) return "";
+raw = raw.split("?")[0];
+
+if(raw.includes("shorts")){
+return "https://www.youtube.com/embed/"+raw.split("shorts/")[1];
+}
+if(raw.includes("watch?v=")){
+return "https://www.youtube.com/embed/"+raw.split("watch?v=")[1];
+}
+if(raw.includes("embed")){
+return raw;
+}
+return "";
+}
+
+function video(i){
+let r = listaActual[i];
+let raw = r.Video || r.Link || r.LINK || r.video || r.link || "";
+let url = convertir(raw);
+
+if(!url){
+alert("Video no válido");
+return;
+}
+
+document.getElementById('app').innerHTML=`
+<button class="back" onclick="home()">⬅</button>
+<iframe class="video" src="${url}" allowfullscreen></iframe>`;
+}
+
+init();
