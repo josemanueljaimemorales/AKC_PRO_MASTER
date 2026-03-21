@@ -1,15 +1,6 @@
 
 let dataGlobal = [];
 
-function clean(text){
-  return (text || "")
-    .toString()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
 fetch('AKC.xlsx')
 .then(res => res.arrayBuffer())
 .then(data => {
@@ -19,7 +10,7 @@ fetch('AKC.xlsx')
 
     dataGlobal = json.map(row => ({
         tipo: row["Tipo"],
-        dia: row["Día"] || row["Dia"],
+        dia: row["Día"],
         semana: row["Semana"],
         nombre: row["Ejercicio"],
         series: row["Series"],
@@ -55,25 +46,21 @@ function verDias(semana){
 
 function verEjercicios(semana, dia){
     let lista = dataGlobal.filter(e =>
-        clean(e.tipo).includes("fuerza") &&
-        (e.semana == semana || clean(e.semana) == clean(semana)) &&
-        clean(e.dia).includes(clean(dia))
+        e.tipo === "Fuerza" &&
+        e.semana == semana &&
+        e.dia === dia
     );
 
     let html = `<div class="back" onclick="verDias(${semana})">⬅</div>`;
 
-    if(lista.length === 0){
-        html += `<p style="color:#aaa">No hay ejercicios para este día/semana</p>`;
-    }
-
     lista.forEach(e=>{
         html += `
-        <div class="card" onclick="verVideo('${e.video || ""}')">
-            <div class="titulo">${e.nombre || ""}</div>
+        <div class="btn" onclick="verVideo('${e.video}')">
+            ${e.nombre || ""}
             <div class="info">
-                ${e.series ? `Series: ${e.series}` : ""}
-                ${e.reps ? ` | Reps: ${e.reps}` : ""}
-                ${e.peso ? ` | Peso: ${e.peso}` : ""}
+                ${e.series ? "Series: " + e.series : ""}
+                ${e.reps ? " | Reps: " + e.reps : ""}
+                ${e.peso ? " | Peso: " + e.peso : ""}
             </div>
         </div>
         `;
@@ -83,10 +70,6 @@ function verEjercicios(semana, dia){
 }
 
 function verVideo(url){
-    if(!url){
-        alert("Este ejercicio no tiene video");
-        return;
-    }
     document.getElementById("app").innerHTML = `
         <div class="back" onclick="verSemanas()">⬅</div>
         <iframe class="video" src="${url}" allowfullscreen></iframe>
