@@ -1,5 +1,25 @@
 let data=[];
 let listaActual=[];
+let stack=[];
+
+function render(html){
+document.getElementById('app').innerHTML = html;
+}
+
+function push(view){
+stack.push(view);
+render(view);
+}
+
+function back(){
+stack.pop();
+let prev = stack[stack.length-1];
+if(prev){
+render(prev);
+}else{
+home();
+}
+}
 
 async function init(){
 const res=await fetch('AKC.xlsx');
@@ -10,29 +30,33 @@ home();
 }
 
 function home(){
-document.getElementById('app').innerHTML=`
+stack=[];
+let html = `
 <button class="btn" onclick="fuerza()">💪 Fuerza</button>
 <button class="btn" onclick="preventivo()">🛡 Preventivo</button>
 <button class="btn" onclick="orientacion()">🧭 Orientación</button>
 <button class="btn" onclick="drill()">⚙ Drill</button>
 <button class="btn" onclick="fesp()">🏋 F ESP APA</button>`;
+push(html);
 }
 
 function fuerza(){
-document.getElementById('app').innerHTML=`
-<button class="back" onclick="home()">⬅</button>
+let html = `
+<button class="back" onclick="back()">⬅</button>
 <button class="btn" onclick="dias('1')">Semana 1</button>
 <button class="btn" onclick="dias('2')">Semana 2</button>
 <button class="btn" onclick="dias('3')">Semana 3</button>`;
+push(html);
 }
 
 function dias(sem){
 window.sem=sem;
-document.getElementById('app').innerHTML=`
-<button class="back" onclick="fuerza()">⬅</button>
+let html = `
+<button class="back" onclick="back()">⬅</button>
 <button class="btn" onclick="lista('Fuerza','Lunes')">Lunes</button>
 <button class="btn" onclick="lista('Fuerza','Miercoles')">Miércoles</button>
 <button class="btn" onclick="lista('Fuerza','Viernes')">Viernes</button>`;
+push(html);
 }
 
 function lista(tipo,dia){
@@ -41,11 +65,12 @@ mostrar(items);
 }
 
 function preventivo(){
-document.getElementById('app').innerHTML=`
-<button class="back" onclick="home()">⬅</button>
+let html = `
+<button class="back" onclick="back()">⬅</button>
 <button class="btn" onclick="listaPrev('1')">Semana 1</button>
 <button class="btn" onclick="listaPrev('2')">Semana 2</button>
 <button class="btn" onclick="listaPrev('3')">Semana 3</button>`;
+push(html);
 }
 
 function listaPrev(sem){
@@ -60,16 +85,16 @@ mostrar(items);
 
 function drill(){
 let aparatos=[...new Set(data.filter(r=>r.Tipo==="Drill").map(r=>r.Aparato))];
-document.getElementById('app').innerHTML=
-`<button class="back" onclick="home()">⬅</button>`+
+let html = `<button class="back" onclick="back()">⬅</button>`+
 aparatos.map(a=>`<button class="btn" onclick="listaA('Drill','${a}')">${a}</button>`).join('');
+push(html);
 }
 
 function fesp(){
 let aparatos=[...new Set(data.filter(r=>r.Tipo==="F ESP APA").map(r=>r.Aparato))];
-document.getElementById('app').innerHTML=
-`<button class="back" onclick="home()">⬅</button>`+
+let html = `<button class="back" onclick="back()">⬅</button>`+
 aparatos.map(a=>`<button class="btn" onclick="listaA('F ESP APA','${a}')">${a}</button>`).join('');
+push(html);
 }
 
 function listaA(tipo,aparato){
@@ -79,8 +104,8 @@ mostrar(items);
 
 function mostrar(items){
 listaActual = items;
-document.getElementById('app').innerHTML=
-`<button class="back" onclick="home()">⬅</button>`+
+let html =
+`<button class="back" onclick="back()">⬅</button>`+
 items.map((r,i)=>`
 <button class="btn" onclick="video(${i})">
 ${r.Ejercicio||r.Nombre||"Ejercicio"}
@@ -91,21 +116,15 @@ ${r.Peso ? " | Peso: "+r.Peso : ""}
 </div>
 </button>
 `).join('');
+push(html);
 }
 
 function convertir(raw){
 if(!raw) return "";
 raw = raw.split("?")[0];
-
-if(raw.includes("shorts")){
-return "https://www.youtube.com/embed/"+raw.split("shorts/")[1];
-}
-if(raw.includes("watch?v=")){
-return "https://www.youtube.com/embed/"+raw.split("watch?v=")[1];
-}
-if(raw.includes("embed")){
-return raw;
-}
+if(raw.includes("shorts")) return "https://www.youtube.com/embed/"+raw.split("shorts/")[1];
+if(raw.includes("watch?v=")) return "https://www.youtube.com/embed/"+raw.split("watch?v=")[1];
+if(raw.includes("embed")) return raw;
 return "";
 }
 
@@ -119,9 +138,10 @@ alert("Video no válido");
 return;
 }
 
-document.getElementById('app').innerHTML=`
-<button class="back" onclick="home()">⬅</button>
+let html = `
+<button class="back" onclick="back()">⬅</button>
 <iframe class="video" src="${url}" allowfullscreen></iframe>`;
+push(html);
 }
 
 init();
