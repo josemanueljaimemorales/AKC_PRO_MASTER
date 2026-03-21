@@ -12,11 +12,12 @@ fetch('AKC.xlsx')
         tipo: row["Tipo"],
         dia: row["Día"],
         semana: row["Semana"],
+        aparato: row["Aparato"],
         nombre: row["Ejercicio"],
         series: row["Series"],
         reps: row["Reps"],
         peso: row["Peso"],
-        video: row["Video"]
+        video: row["Video"] || row["VIDEO"] || row["link"] || ""
     }));
 
     home();
@@ -24,11 +25,16 @@ fetch('AKC.xlsx')
 
 function home(){
     document.getElementById("app").innerHTML = `
-        <button class="btn" onclick="verSemanas()">💪 Fuerza</button>
+        <button class="btn" onclick="verFuerza()">💪 Fuerza</button>
+        <button class="btn" onclick="verPreventivo()">🛡 Preventivo</button>
+        <button class="btn" onclick="verOrientacion()">🧭 Orientación</button>
+        <button class="btn" onclick="verDrill()">🔁 Drill</button>
+        <button class="btn" onclick="verFES()">⚡ F Esp APA</button>
     `;
 }
 
-function verSemanas(){
+// ================= FUERZA =================
+function verFuerza(){
     let html = `<div class="back" onclick="home()">⬅</div>`;
     [1,2,3].forEach(s=>{
         html += `<button class="btn" onclick="verDias(${s})">Semana ${s}</button>`;
@@ -37,7 +43,7 @@ function verSemanas(){
 }
 
 function verDias(semana){
-    let html = `<div class="back" onclick="verSemanas()">⬅</div>`;
+    let html = `<div class="back" onclick="verFuerza()">⬅</div>`;
     ["Lunes","Miércoles","Viernes"].forEach(d=>{
         html += `<button class="btn" onclick="verEjercicios(${semana}, '${d}')">${d}</button>`;
     });
@@ -51,7 +57,48 @@ function verEjercicios(semana, dia){
         e.dia === dia
     );
 
-    let html = `<div class="back" onclick="verDias(${semana})">⬅</div>`;
+    renderLista(lista, () => verDias(semana));
+}
+
+// ================= PREVENTIVO =================
+function verPreventivo(){
+    let html = `<div class="back" onclick="home()">⬅</div>`;
+    [1,2,3].forEach(s=>{
+        html += `<button class="btn" onclick="verPreventivoLista(${s})">Semana ${s}</button>`;
+    });
+    document.getElementById("app").innerHTML = html;
+}
+
+function verPreventivoLista(semana){
+    let lista = dataGlobal.filter(e =>
+        e.tipo === "Preventivo" &&
+        e.semana == semana
+    );
+
+    renderLista(lista, verPreventivo);
+}
+
+// ================= ORIENTACION =================
+function verOrientacion(){
+    let lista = dataGlobal.filter(e => e.tipo === "Orientacion");
+    renderLista(lista, home);
+}
+
+// ================= DRILL =================
+function verDrill(){
+    let lista = dataGlobal.filter(e => e.tipo === "Drill");
+    renderLista(lista, home);
+}
+
+// ================= FES =================
+function verFES(){
+    let lista = dataGlobal.filter(e => e.tipo === "F Esp APA");
+    renderLista(lista, home);
+}
+
+// ================= RENDER =================
+function renderLista(lista, backFn){
+    let html = `<div class="back" onclick="(${backFn})()">⬅</div>`;
 
     lista.forEach(e=>{
         html += `
@@ -69,9 +116,15 @@ function verEjercicios(semana, dia){
     document.getElementById("app").innerHTML = html;
 }
 
+// ================= VIDEO =================
 function verVideo(url){
+    if(!url){
+        alert("Este ejercicio no tiene video (revisa columna Video en Excel)");
+        return;
+    }
+
     document.getElementById("app").innerHTML = `
-        <div class="back" onclick="verSemanas()">⬅</div>
+        <div class="back" onclick="home()">⬅</div>
         <iframe class="video" src="${url}" allowfullscreen></iframe>
     `;
 }
