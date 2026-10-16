@@ -57,7 +57,9 @@
       const t = tras(e);
       // Si en el ciclo anterior se encimó con un evento de equipo (campamento), seguramente fue individual
       const individual = evs.some(x => x.type === "evento" && x.start <= e.end && x.end >= e.start && !/HALLOWEEN|POSADA|DIA DEL NI/.test(x.title));
-      return { nombre: subirAnio(e.title, anios), inicio: t.start, fin: t.end, tipo: individual ? "control" : adivinarTipo(e.title), descansoDespues: conDesc.has(e.title), estimada: true, antes: `${F.rango(e.start, e.end)}` };
+      return { nombre: subirAnio(e.title, anios), inicio: t.start, fin: t.end, tipo: individual ? "control" : adivinarTipo(e.title),
+        // Regla de Manu: si la competencia termina en domingo, el lunes siguiente es descanso para quienes compitieron
+        descansoDespues: conDesc.has(e.title) || (!individual && F.diaSemana(t.end) === 0), estimada: true, antes: `${F.rango(e.start, e.end)}` };
     }).filter(x => dentro({ start: x.inicio }));
     const eventos = evs.filter(e => e.type === "evento").map(e => { const t = tras(e); return { nombre: subirAnio(e.title, anios), inicio: t.start, fin: t.end, estimada: true }; }).filter(x => dentro({ start: x.inicio }));
     const fest = F.festivos(ini, fn);

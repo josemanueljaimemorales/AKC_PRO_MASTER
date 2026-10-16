@@ -157,7 +157,7 @@
   function impresion(m) {
     const box = $("print-tl"); box.innerHTML = "";
     const N = m.weeks.length, mitad = Math.ceil(N / 2);
-    const head = `<div class="p-head"><img src="assets/logo.png" alt=""><div><b>Macrociclo ${anios(m)}</b><span>Gimnasia Artística Varonil · Águilas KC · ${F.texto(m.start)} – ${F.texto(m.end)}</span></div></div>`;
+    const head = `<div class="p-head"><img src="assets/aguilas-kc-logo.png" alt=""><div><b>Macrociclo ${anios(m)}</b><span>Gimnasia Artística Varonil · Águilas KC · ${F.texto(m.start)} – ${F.texto(m.end)}</span></div></div>`;
     for (const [a, b] of [[0, mitad], [mitad, N]]) {
       const pg = document.createElement("div"); pg.className = "p-pagina";
       pg.innerHTML = head;
@@ -235,6 +235,8 @@
     f.addEventListener("input", ev => {
       if (ev.target.id === "nc-inicio" || ev.target.id === "nc-fin") semanas();
       if (ev.target.dataset.k === "confirmada") ev.target.nextElementSibling.textContent = ev.target.checked ? "Confirmada" : "Estimada";
+      // Si una competencia termina en domingo, se propone descanso el lunes siguiente
+      if (ev.target.dataset.k === "fin" && ev.target.value && F.diaSemana(ev.target.value) === 0) { const c = ev.target.closest("tr").querySelector('[data-k="descansoDespues"]'); if (c) c.checked = true; }
       estado.datos = leerForm(); guardar(estado.datos);
     });
     f.addEventListener("click", ev => {
