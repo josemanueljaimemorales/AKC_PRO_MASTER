@@ -145,7 +145,8 @@
       i = j + 1;
     }
     // Área de impresión
-    ws.pageSetup.printArea = `A1:${letra(ult)}17`;          // el resto de la configuración de impresión se queda como en la plantilla
+    // ExcelJS antepone "$" solo a cada parte: con "A$1" queda $A$1 (Excel rechaza el archivo si el área no es absoluta)
+    ws.pageSetup.printArea = `A$1:${letra(ult)}$17`;
 
     // Hoja1: resumen MES / DÍA / DESCRIPCION
     const h = wb.getWorksheet("Hoja1");
