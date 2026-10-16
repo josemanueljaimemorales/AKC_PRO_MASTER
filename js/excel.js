@@ -189,13 +189,27 @@
       return `<${padre}${attrs || ""}>${hijos.slice().sort((x, y) => pos(x) - pos(y)).join("")}</${padre}>`;
     });
   }
+  // La plantilla trae miles de filas vacías con formato (Hoja1 llega a 16 104); en el celular Excel se queda
+  // cargando. Se quitan las filas vacías después de la última con datos o celdas combinadas.
+  function recortarFilas(xml) {
+    const filas = [...xml.matchAll(/<row\s[^>]*?(?:\/>|>[\s\S]*?<\/row>)/g)];
+    const num = t => +t.match(/\sr="(\d+)"/)[1];
+    let ult = 0;
+    for (const f of filas) if (/<v>|<is>|<f[ >]/.test(f[0])) ult = Math.max(ult, num(f[0]));
+    for (const mc of xml.matchAll(/<mergeCell ref="[A-Z]+\d+:[A-Z]+(\d+)"/g)) ult = Math.max(ult, +mc[1]);
+    if (!ult) return xml;
+    let out = "", pos = 0;
+    for (const f of filas) if (num(f[0]) > ult) { out += xml.slice(pos, f.index); pos = f.index + f[0].length; }
+    out += xml.slice(pos);
+    return out.replace(/(<dimension ref="[A-Z]+\d+:[A-Z]+)\d+"/, `$1${ult}"`);
+  }
   async function ordenarXml(buf) {
     const JSZip = g.JSZip; if (!JSZip) return buf;
     const zip = await JSZip.loadAsync(buf);
     const st = zip.file("xl/styles.xml");
     if (st) zip.file("xl/styles.xml", reordenar(await st.async("string"), "font", ORDEN_FONT));
     for (const nombre of Object.keys(zip.files).filter(n => /^xl\/worksheets\/sheet\d+\.xml$/.test(n)))
-      zip.file(nombre, reordenar(await zip.file(nombre).async("string"), "sheetPr", ORDEN_SHEETPR));
+      zip.file(nombre, recortarFilas(reordenar(await zip.file(nombre).async("string"), "sheetPr", ORDEN_SHEETPR)));
     return zip.generateAsync({ type: "arraybuffer", compression: "DEFLATE", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   }
   function nombreArchivo(m) { const a = +m.start.slice(2, 4); return `MACRO_${String(a).padStart(2, "0")}_${String(a + 1).padStart(2, "0")}.xlsx`; }
