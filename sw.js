@@ -1,6 +1,6 @@
 /* Macrociclos AKC: guarda la app para abrirla sin conexión. Los datos (Drive) siempre se piden en línea;
    si no hay conexión se usa la copia del MACRO incluida en la app. Subir VERSION al cambiar archivos. */
-const VERSION = "macro-v6";
+const VERSION = "macro-v7";
 const ARCHIVOS = ["./", "index.html", "manifest.webmanifest", "css/app.css", "js/config.js", "js/fechas.js", "js/modelo.js", "js/lector.js",
   "js/generador.js", "js/excel.js", "js/guardar-drive.js", "js/vista.js", "js/app.js", "assets/MACRO_26_27.xlsx", "assets/aguilas-kc-logo.png",
   "iconos/icono-192.png", "iconos/favicon-32.png", "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"];
