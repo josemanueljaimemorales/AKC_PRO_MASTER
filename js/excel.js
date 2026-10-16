@@ -173,7 +173,30 @@
       }
       cerrarMes(r - 1);
     }
-    return wb.xlsx.writeBuffer();
+    return ordenarXml(await wb.xlsx.writeBuffer());
+  }
+
+  // ExcelJS escribe algunos elementos en un orden que la norma de Excel no permite (Excel del celular pide
+  // "reparar" el archivo). Aquí se reacomodan dentro del .xlsx: hijos de <font> y de <sheetPr>.
+  const ORDEN_FONT = ["b", "i", "strike", "condense", "extend", "outline", "shadow", "u", "vertAlign", "sz", "color", "name", "family", "charset", "scheme"];
+  const ORDEN_SHEETPR = ["tabColor", "outlinePr", "pageSetUpPr"];
+  function reordenar(xml, padre, orden) {
+    const re = new RegExp(`<${padre}(\\s[^>]*)?>([\\s\\S]*?)</${padre}>`, "g");
+    return xml.replace(re, (todo, attrs, dentro) => {
+      const hijos = dentro.match(/<([A-Za-z]+)\b[^>]*?(?:\/>|>[\s\S]*?<\/\1>)/g) || [];
+      if (hijos.join("") !== dentro.trim()) return todo;                 // contenido inesperado: no se toca
+      const pos = h => { const i = orden.indexOf(h.match(/^<([A-Za-z]+)/)[1]); return i < 0 ? 99 : i; };
+      return `<${padre}${attrs || ""}>${hijos.slice().sort((x, y) => pos(x) - pos(y)).join("")}</${padre}>`;
+    });
+  }
+  async function ordenarXml(buf) {
+    const JSZip = g.JSZip; if (!JSZip) return buf;
+    const zip = await JSZip.loadAsync(buf);
+    const st = zip.file("xl/styles.xml");
+    if (st) zip.file("xl/styles.xml", reordenar(await st.async("string"), "font", ORDEN_FONT));
+    for (const nombre of Object.keys(zip.files).filter(n => /^xl\/worksheets\/sheet\d+\.xml$/.test(n)))
+      zip.file(nombre, reordenar(await zip.file(nombre).async("string"), "sheetPr", ORDEN_SHEETPR));
+    return zip.generateAsync({ type: "arraybuffer", compression: "DEFLATE", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   }
   function nombreArchivo(m) { const a = +m.start.slice(2, 4); return `MACRO_${String(a).padStart(2, "0")}_${String(a + 1).padStart(2, "0")}.xlsx`; }
 
