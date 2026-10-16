@@ -6,5 +6,5 @@ window.AKC_CONFIG = {
   RESPALDO: "assets/MACRO_26_27.xlsx",         // copia local por si Drive no responde
   // Para "Guardar en Drive": ID del cliente OAuth (tipo "Aplicación web") del proyecto de Google Cloud,
   // con https://josemanueljaimemorales.github.io como origen autorizado. Vacío = botón sin configurar.
-  GOOGLE_CLIENT_ID: ""
+  GOOGLE_CLIENT_ID: "372803477929-dq15a75h1srbrsibf82jbi0n00h7ukiu.apps.googleusercontent.com"
 };
