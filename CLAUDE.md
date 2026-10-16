@@ -11,6 +11,9 @@ Estilo de aguilaskc.net (claro/oscuro, acento dorado); la línea de tiempo siemp
 - `js/excel.js` escribe el MACRO nuevo con el formato del anterior (plantilla). `js/vista.js` y `js/app.js`: pantalla e impresión.
 - `js/guardar-drive.js`: "Guardar en Drive" con Google (permiso drive.file) en la carpeta "Macrociclos AKC (guardados)",
   distinta de "Utilidades App". `GOOGLE_CLIENT_ID` en `js/config.js` (proyecto akc-con-reporte; no es secreto).
+- `js/excel.js` termina con `ordenarXml` (JSZip): reacomoda hijos de `<font>` y `<sheetPr>`, porque ExcelJS los escribe en un
+  orden que Excel del celular rechaza ("problema con el contenido"). Validar todo Excel generado con el Open XML SDK
+  (`OpenXmlValidator`): debe dar 0 errores, igual que el MACRO original.
 - `sw.js`: funciona sin conexión. **Subir `VERSION`** (y los `?v=` de index.html) al cambiar archivos.
 
 ## Datos
