@@ -12,7 +12,7 @@
     meso: { BASE: ["#dbeafe", "#0f172a"], DESARROLLADOR: ["#93c5fd", "#0f172a"], ESTABILIZADOR: ["#3b82f6", "#fff"],
       PRECOMPETITIVO: ["#fcd34d", "#0f172a"], COMPETITIVO: ["#fca5a5", "#0f172a"], TRANSITORIO: ["#cbd5e1", "#0f172a"] },
     tec: { ALTO: ["#1d4ed8", "#fff"], MEDIO: ["#60a5fa", "#0f172a"], BAJO: ["#dbeafe", "#0f172a"] },
-    fza: { "60 - 80 %": ["#c2410c", "#fff"], "45 - 60 %": ["#fb923c", "#0f172a"], "35 - 45 %": ["#ffedd5", "#0f172a"] },
+    fza: { "60 - 80 %": ["#c2410c", "#fff"], "45 - 60 %": ["#fb923c", "#0f172a"], "35 - 45 %": ["#fdba74", "#0f172a"] },
     trab: { "Elementos sueltos": ["#dcfce7", "#14532d", "SUE"], "Enlaces": ["#86efac", "#14532d", "ENL"], "Medias rutinas": ["#22c55e", "#052e16", "½ R"],
       "Rutinas completas": ["#15803d", "#fff", "RC"], "Recuperación y pulimiento": ["#e2e8f0", "#0f172a", "REC"] },
     nuevos: { Aprendizaje: ["#7c3aed", "#fff", "APR"], Desarrollo: ["#c4b5fd", "#1e1b4b", "DES"], Dominados: ["#ede9fe", "#1e1b4b", "DOM"] },
@@ -33,7 +33,7 @@
 
   const ROWS = [
     ["mes", "", 30], ["sem", "Semana", 24], ["periodo", "Periodo", 38], ["etapa", "Etapa", 32], ["meso", "Mesociclo", 32],
-    ["micro", "Microciclo", 32], ["tec", "Técnico", 32], ["fza", "Fuerza", 32], ["trab", "Trabajo técnico", 32], ["nuevos", "Elementos nuevos", 32], ["ev", "Competencias", 30]
+    ["micro", "Microciclo", 32], ["sf", "Semana de fuerza", 28], ["gfza", "Carga de fuerza", 124], ["gtec", "Nivel técnico", 92], ["trab", "Trabajo técnico", 32], ["nuevos", "Elementos nuevos", 32], ["ev", "Competencias", 30]
   ];
 
   // Etapa técnica y elementos nuevos por semana (para cualquier modelo)
@@ -46,7 +46,7 @@
       let trab = ""; for (const t of texts) { trab = M.etapaTecnica(t); if (trab) break; }
       let k = Infinity; for (let j = i; j < N; j++) if (comp.has(j)) { k = j - i; break; }
       const nuevos = /DESCANSO|TRANSIT/.test(w.micro) ? "" : k <= 2 ? "Dominados" : k <= 4 ? "Desarrollo" : "Aprendizaje";
-      return { trab, nuevos, k };
+      return { trab, nuevos, k, sf: M.semanaFuerza(m, i) };
     });
   }
 
@@ -92,15 +92,46 @@
     for (let w = w0; w < w1; w++) {
       const wk = m.weeks[w], mi = micro(wk.micro), e = ex[w];
       caja("micro", x(w), x(w + 1), mi.f, mi.a, mi.tx);
-      if (wk.split) { caja("tec", x(w), x(w + 1), `url(#rayas${w0})`, "±", C.tinta); caja("fza", x(w), x(w + 1), `url(#rayas${w0})`, "±", C.tinta); }
-      else {
-        const t = C.tec[wk.tec], f = C.fza[wk.fza];
-        caja("tec", x(w), x(w + 1), t ? t[0] : "#fff", wk.tec ? wk.tec.charAt(0) + wk.tec.slice(1).toLowerCase() : "", t ? t[1] : C.tinta, 13);
-        caja("fza", x(w), x(w + 1), f ? f[0] : "#fff", wk.fza ? wk.fza.replace(/\s|%/g, "").replace("-", "–") : "", f ? f[1] : C.tinta, 13);
-      }
+      caja("sf", x(w), x(w + 1), "#f1f5f9", "S" + e.sf, C.tinta, 13);
       const tb = C.trab[e.trab]; caja("trab", x(w), x(w + 1), tb ? tb[0] : "#ffffff", tb ? tb[2] : "", tb ? tb[1] : C.tinta, 13);
       const nv = C.nuevos[e.nuevos]; caja("nuevos", x(w), x(w + 1), nv ? nv[0] : "#ffffff", nv ? nv[2] : "", nv ? nv[1] : C.tinta, 13);
     }
+    // --- Gráficas: carga de fuerza (%) y nivel técnico, con el mismo eje de semanas ---
+    const compW = new Set();
+    for (const e of m.events) if (e.type === "competencia") for (let s = e.start; s <= e.end; s = F.sumar(s, 1)) compW.add(Math.floor(F.dif(m.start, s) / 7));
+    const [fy, fh] = Y.gfza, [ty, th] = Y.gtec;
+    const yF = p => fy + 18 + (80 - p) / (80 - 30) * (fh - 24);           // eje 30–80 %, con espacio arriba para el texto
+    const yT = l => ty + 12 + (3 - l) / 2 * (th - 24);                        // Bajo=1, Medio=2, Alto=3
+    for (const p of [35, 45, 60, 80]) el("line", { x1: x(w0), x2: x(w1), y1: yF(p), y2: yF(p), stroke: "#e2e8f0", "stroke-width": 1 }, g0);
+    for (const l of [1, 2, 3]) el("line", { x1: x(w0), x2: x(w1), y1: yT(l), y2: yT(l), stroke: "#e2e8f0", "stroke-width": 1 }, g0);
+    el("line", { x1: x(w0), x2: x(w1), y1: fy + fh, y2: fy + fh, stroke: "#cbd5e1", "stroke-width": 1 }, g0);
+    const RANGO = { "35 - 45 %": [35, 45], "45 - 60 %": [45, 60], "60 - 80 %": [60, 80] }, NIV = { BAJO: 1, MEDIO: 2, ALTO: 3 };
+    let dF = "", dT = "", pF = false, pT = false;
+    for (let w = w0; w < w1; w++) {
+      const wk = m.weeks[w];
+      if (compW.has(w)) { el("rect", { x: x(w), y: fy + 2, width: CW, height: fh - 2, fill: "#fee2e2" }, g0); el("rect", { x: x(w), y: ty + 2, width: CW, height: th - 4, fill: "#fee2e2" }, g0); }
+      if (wk.split) {
+        el("rect", { x: x(w) + 3, y: fy + 4, width: CW - 6, height: fh - 8, fill: `url(#rayas${w0})`, opacity: .7 }, g0);
+        el("rect", { x: x(w) + 3, y: ty + 4, width: CW - 6, height: th - 8, fill: `url(#rayas${w0})`, opacity: .7 }, g0);
+        pF = pT = false; continue;
+      }
+      const r = RANGO[wk.fza];
+      if (r) {
+        el("rect", { x: x(w) + 7, y: yF(r[1]), width: CW - 14, height: yF(r[0]) - yF(r[1]), rx: 4, fill: C.fza[wk.fza][0], opacity: .9 }, g0);
+        el("text", { x: x(w) + CW / 2, y: yF(r[1]) - 4, "text-anchor": "middle", fill: "#7c2d12", "font-size": 11, "font-weight": 700 }, g0, `${r[0]}–${r[1]}`);
+        const mid = yF((r[0] + r[1]) / 2); dF += (pF ? "L" : "M") + `${x(w) + CW / 2},${mid}`; pF = true;
+      } else pF = false;
+      const l = NIV[wk.tec];
+      if (l) { const yy = yT(l); dT += (pT ? "L" : "M") + `${x(w)},${yy}L${x(w + 1)},${yy}`; pT = true; } else pT = false;
+    }
+    el("path", { d: dF, fill: "none", stroke: "#9a3412", "stroke-width": 2, "stroke-linejoin": "round" }, g0);
+    el("path", { d: dT, fill: "none", stroke: "#1d4ed8", "stroke-width": 3, "stroke-linejoin": "round" }, g0);
+    for (let w = w0; w < w1; w++) { const l = NIV[m.weeks[w].tec]; if (l && !m.weeks[w].split) el("circle", { cx: x(w) + CW / 2, cy: yT(l), r: 4, fill: "#1d4ed8", stroke: "#fff", "stroke-width": 2 }, g0); }
+    if (LW) {                                  // marcas del eje en la columna de etiquetas
+      for (const p of [35, 45, 60, 80]) el("text", { x: LW - 6, y: yF(p) + 4, "text-anchor": "end", fill: C.tinta2, "font-size": 12, "font-weight": 600 }, g0, p + " %");
+      for (const [l, t] of [[3, "Alto"], [2, "Medio"], [1, "Bajo"]]) el("text", { x: LW - 6, y: yT(l) + 4, "text-anchor": "end", fill: "#1d4ed8", "font-size": 12, "font-weight": 700 }, g0, t);
+    }
+
     // competencias, eventos y descansos
     const [ey, eh] = Y.ev;
     for (const e of m.events) {
@@ -123,13 +154,14 @@
 
   function leyendaHTML() {
     const sw = (f, t, tx = "#0f172a") => `<span class="lg"><i style="background:${f};color:${tx}"></i>${t}</span>`;
-    const tec = Object.entries(C.tec).map(([k, v]) => sw(v[0], cap(k))).join("");
-    const fza = Object.entries(C.fza).map(([k, v]) => sw(v[0], k)).join("");
+    const fza = Object.entries(C.fza).map(([k, v]) => sw(v[0], (k === "35 - 45 %" ? "Baja " : k === "45 - 60 %" ? "Media " : "Alta ") + k)).join("");
     const trab = Object.entries(C.trab).map(([k, v]) => sw(v[0], `<b>${v[2]}</b> ${k}`)).join("");
     const nv = [["Aprendizaje", "APR", "aprende elementos nuevos"], ["Desarrollo", "DES", "los perfecciona"], ["Dominados", "DOM", "compite solo con lo dominado"]]
       .map(([k, a, t]) => sw(C.nuevos[k][0], `<b>${a}</b> ${t}`)).join("");
     const mic = MICRO.map(([, a, f]) => sw(f, `<b>${a}</b> ${MICRO_NOMBRE[a]}`)).join("");
-    return `<div class="lg-grupo"><b>Técnico</b>${tec}</div><div class="lg-grupo"><b>Fuerza</b>${fza}</div>
+    return `<div class="lg-grupo"><b>Carga de fuerza (gráfica naranja: rango de % por semana)</b>${fza}</div>
+      <div class="lg-grupo"><b>Nivel técnico (línea azul)</b><span class="lg">Bajo · Medio · Alto. Fondo rojo = semana de competencia</span></div>
+      <div class="lg-grupo"><b>Semana de fuerza</b><span class="lg">S1, S2, S3, S4: giran siempre para variar el estímulo; en semanas normales S1 baja, S2 media, S3 alta, S4 media</span></div>
       <div class="lg-grupo"><b>Trabajo técnico</b>${trab}</div><div class="lg-grupo"><b>Elementos nuevos</b>${nv}</div>
       <div class="lg-grupo"><b>Microciclo</b>${mic}</div>
       <div class="lg-grupo"><b>Fila de competencias</b>${sw(C.comp, "Competencia")}${sw(C.evt, "Evento")}${sw(C.desc, "Descanso o vacaciones")}${sw(C.hoy, "Hoy")}</div>

@@ -24,6 +24,9 @@ Estilo de aguilaskc.net (claro/oscuro, acento dorado); la línea de tiempo siemp
   C competencia, E evento, V vacaciones.
 - **Semana tipo fija** (cambian cargas, no la distribución): L básicos (CH), Ma y Mi 3 aparatos (O), J carga baja +
   anillos + elementos en rojo (R), V salidas (O), S piso, paralelas, fija y arzón (CH), D descanso.
+- **Semana de fuerza 1-4**: gira siempre sin reiniciar (varía el estímulo); se acomoda para que la primera competencia sea
+  semana 1. Carga en semanas normales: S1 baja (35-45 %), S2 media (45-60 %), S3 alta (60-80 %), S4 media; cerca de
+  competir se ajusta la carga, no el número. En la vista, fuerza y técnico van como gráficas (no celdas de color).
 - Se compite con técnico ALTO y fuerza 35-45 %, con progresión (-2 sem 60-80 %, -1 sem 45-60 %); siempre hay elementos
   nuevos en aprendizaje salvo cerca de competir (solo dominados).
 - Si una competencia termina en domingo, el lunes siguiente es descanso para quienes compitieron.

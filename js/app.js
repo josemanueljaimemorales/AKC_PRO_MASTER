@@ -125,7 +125,8 @@
         <div><small>Mesociclo</small>${etiqueta(me ? cap(me.label) : "—", me && V.C.meso[me.label])}</div>
         <div><small>Microciclo</small>${etiqueta(V.MICRO_NOMBRE[mi.a] || cap(w.micro), [mi.f, mi.tx])}</div>
         <div><small>Nivel técnico</small>${w.split ? etiqueta("Según vaya o no al selectivo", null) : etiqueta(w.tec ? cap(w.tec) : "—", tec)}</div>
-        <div><small>Carga de fuerza</small>${w.split ? etiqueta("Según vaya o no al selectivo", null) : etiqueta(w.fza || "—", fza)}</div>
+        <div><small>Carga de fuerza</small>${w.split ? etiqueta("Según vaya o no al selectivo", null) : etiqueta(w.fza ? ({ "35 - 45 %": "Baja", "45 - 60 %": "Media", "60 - 80 %": "Alta" }[w.fza] + " · " + w.fza) : "—", fza)}</div>
+        <div><small>Semana de fuerza</small>${etiqueta("Semana " + ex.sf, ["#f1f5f9", "#0f172a"])}</div>
         <div><small>Trabajo técnico</small>${etiqueta(ex.trab || "—", V.C.trab[ex.trab])}</div>
         <div><small>Elementos nuevos</small>${etiqueta(ex.nuevos === "Dominados" ? "Solo elementos dominados" : ex.nuevos || "—", V.C.nuevos[ex.nuevos])}</div>
       </div>
