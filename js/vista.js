@@ -132,7 +132,8 @@
     return `<div class="lg-grupo"><b>Técnico</b>${tec}</div><div class="lg-grupo"><b>Fuerza</b>${fza}</div>
       <div class="lg-grupo"><b>Trabajo técnico</b>${trab}</div><div class="lg-grupo"><b>Elementos nuevos</b>${nv}</div>
       <div class="lg-grupo"><b>Microciclo</b>${mic}</div>
-      <div class="lg-grupo"><b>Fila de competencias</b>${sw(C.comp, "Competencia")}${sw(C.evt, "Evento")}${sw(C.desc, "Descanso o vacaciones")}${sw(C.hoy, "Hoy")}</div>`;
+      <div class="lg-grupo"><b>Fila de competencias</b>${sw(C.comp, "Competencia")}${sw(C.evt, "Evento")}${sw(C.desc, "Descanso o vacaciones")}${sw(C.hoy, "Hoy")}</div>
+      <div class="lg-grupo"><b>Unidad de entrenamiento (letra de cada día)</b><span class="lg"><b>CH</b> Choque</span><span class="lg"><b>O</b> Ordinaria</span><span class="lg"><b>R</b> Recuperación</span><span class="lg"><b>D</b> Descanso</span><span class="lg"><b>C</b> Competencia</span><span class="lg"><b>E</b> Evento</span><span class="lg"><b>V</b> Vacaciones</span><span class="lg"><b>C/E</b> dos cosas el mismo día</span></div>`;
   }
 
   g.AKC = Object.assign(g.AKC || {}, { V: { timeline, extras, leyendaHTML, cap, micro, MICRO_NOMBRE, C, ROWS } });
