@@ -57,5 +57,14 @@
     return "";
   }
 
-  g.AKC = Object.assign(g.AKC || {}, { M: { NIVELES, FUERZA, SPLIT, partes, tipoDe, eventos, semanaDe, bloqueEn, etapaTecnica } });
+  // Semana de fuerza (1-4): gira siempre, sin reiniciar, para variar el estímulo (criterio de Manu).
+  // Se acomoda para que la primera competencia caiga en semana 1. La carga (baja/media/alta) es aparte.
+  function anclaFuerza(m) {
+    if (Number.isFinite(m.anclaFuerza)) return m.anclaFuerza;
+    const c = (m.events || []).find(e => e.type === "competencia" && !/CONTROL|INTERNO/.test(e.title));
+    return c ? Math.floor(F.dif(m.start, c.start) / 7) : 0;
+  }
+  function semanaFuerza(m, w) { const a = anclaFuerza(m); return (((w - a) % 4) + 4) % 4 + 1; }
+
+  g.AKC = Object.assign(g.AKC || {}, { M: { NIVELES, FUERZA, SPLIT, partes, tipoDe, eventos, semanaDe, bloqueEn, etapaTecnica, anclaFuerza, semanaFuerza } });
 })(typeof window !== "undefined" ? window : globalThis);

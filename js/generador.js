@@ -202,8 +202,12 @@
       else set(w + 1, "MEDIO", "45 - 60 %");
     }
     for (let w = 0; w < N; w++) if (esComp(w)) set(w - 2, "BAJO", "60 - 80 %");
-    const ola = [["ALTO", "35 - 45 %"], ["MEDIO", "45 - 60 %"], ["BAJO", "60 - 80 %"], ["MEDIO", "45 - 60 %"]];
-    for (let w = 0; w < N; w++) if (!weeks[w].tec && !weeks[w].split) { const k = proxComp(w); set(w, ...ola[(isFinite(k) ? k : w) % 4]); }
+    // Semanas libres: la carga sigue la semana de fuerza (1 baja, 2 media, 3 alta, 4 media) y la técnica va al revés.
+    // La semana de fuerza gira 1-4 sin reiniciar; se acomoda para que la primera competencia sea semana 1.
+    const ancla = pico.length ? pico[0].w1 : 0;
+    const semF = w => (((w - ancla) % 4) + 4) % 4 + 1;
+    const porSemana = { 1: ["ALTO", "35 - 45 %"], 2: ["MEDIO", "45 - 60 %"], 3: ["BAJO", "60 - 80 %"], 4: ["MEDIO", "45 - 60 %"] };
+    for (let w = 0; w < N; w++) if (!weeks[w].tec && !weeks[w].split) set(w, ...porSemana[semF(w)]);
 
     // --- Texto técnico de cada semana ---
     const fracPrep = w => w / Math.max(1, (comps.length ? Math.min(P, comps[0].w1) : P));
@@ -263,7 +267,7 @@
       start, end, days,
       weeks: weeks.map(({ per, ...w }) => w),
       bands: { periodo: bandas(periodo), etapa: bandas(w => etapa[w].lab, w => etapa[w].id), mesociclo: bandas(w => meso[w].lab, w => meso[w].id) },
-      generado: true
+      generado: true, anclaFuerza: ancla
     };
     m.events = g.AKC.M.eventos(m);
     m.decisiones = [
