@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Macrociclos AKC</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="css/app.css?v=1">
+</head>
+<body>
+<header class="barra">
+  <div class="barra-in">
+    <img src="assets/logo.png" alt="" width="40" height="40">
+    <div class="marca"><small>Gimnasia Artística Varonil · Águilas KC</small><b>Macrociclos</b></div>
+    <nav class="tabs" aria-label="Secciones">
+      <button id="tab-ver" class="tab activo" type="button">Ciclo actual</button>
+      <button id="tab-nuevo" class="tab" type="button">Nuevo ciclo</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p id="estado" class="estado">Cargando el MACRO desde Google Drive…</p>
+
+  <!-- ============ VER UN CICLO ============ -->
+  <section id="vista-ciclo" hidden>
+    <div class="titulo-ciclo">
+      <div>
+        <p class="eyebrow" id="vc-fuente"></p>
+        <h1 id="vc-titulo">Macrociclo</h1>
+        <p class="sub" id="vc-rango"></p>
+      </div>
+      <div class="acciones">
+        <button class="btn" id="btn-imprimir" type="button">Imprimir</button>
+        <button class="btn sec" id="btn-excel" type="button">Descargar Excel</button>
+        <button class="btn oro" id="btn-guardar" type="button" hidden>Guardar en Drive</button>
+      </div>
+    </div>
+    <p class="guardado" id="guardar-estado" hidden></p>
+    <div class="aviso" id="vc-aviso" hidden></div>
+    <div class="resumen" id="vc-resumen"></div>
+
+    <section class="card">
+      <div class="card-head"><h2>Línea de tiempo</h2><span class="hint">Toca una semana para ver su detalle. Desliza a los lados.</span></div>
+      <div class="tl"><div class="tl-lab" id="tl-lab"></div><div class="tl-scroll" id="tl-scroll"></div></div>
+      <div class="detalle" id="detalle" aria-live="polite"></div>
+      <details class="leyenda-box" open><summary>Qué significa cada color</summary><div class="leyenda" id="leyenda"></div></details>
+    </section>
+
+    <div class="dos">
+      <section class="card">
+        <div class="card-head"><h2>Semana tipo</h2><span class="hint">La distribución no cambia; cambian las cargas según la etapa.</span></div>
+        <div class="semana-tipo" id="semana-tipo"></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2>Competencias y eventos</h2></div>
+        <div class="lista-ev" id="lista-ev"></div>
+      </section>
+    </div>
+
+    <!-- Solo impresión: dos franjas de semanas -->
+    <div class="solo-print" id="print-tl"></div>
+  </section>
+
+  <!-- ============ NUEVO CICLO ============ -->
+  <section id="vista-nuevo" hidden>
+    <div class="titulo-ciclo">
+      <div>
+        <p class="eyebrow">Nuevo ciclo</p>
+        <h1>Crear macrociclo</h1>
+        <p class="sub" id="nc-base"></p>
+      </div>
+    </div>
+
+    <form id="form-nuevo" class="pasos" novalidate>
+      <section class="card paso">
+        <h2><span class="num-paso">1</span> Fechas del ciclo</h2>
+        <div class="fila-campos">
+          <label>Inicio (se ajusta al lunes)<input type="date" id="nc-inicio" required></label>
+          <label>Fin (se ajusta al domingo)<input type="date" id="nc-fin" required></label>
+          <div class="nota" id="nc-semanas"></div>
+        </div>
+      </section>
+
+      <section class="card paso">
+        <h2><span class="num-paso">2</span> Competencias</h2>
+        <p class="hint">Propuestas con las fechas del ciclo anterior, un año después y en el mismo día de la semana. Corrige la fecha, el tipo, y marca <b>Confirmada</b> cuando la fecha sea oficial.</p>
+        <div class="tabla-edit"><table id="t-comp">
+          <thead><tr><th>Competencia</th><th>Inicio</th><th>Fin</th><th>Tipo</th><th title="Descanso el día siguiente solo para quienes compitieron">Descanso después</th><th>Confirmada</th><th></th></tr></thead>
+          <tbody></tbody></table></div>
+        <button class="btn sec chico" type="button" data-agregar="competencias">+ Agregar competencia</button>
+      </section>
+
+      <section class="card paso">
+        <h2><span class="num-paso">3</span> Vacaciones y descansos</h2>
+        <h3>Vacaciones</h3>
+        <div class="tabla-edit"><table id="t-vac"><thead><tr><th>Nombre</th><th>Inicio</th><th>Fin</th><th></th></tr></thead><tbody></tbody></table></div>
+        <button class="btn sec chico" type="button" data-agregar="vacaciones">+ Agregar vacaciones</button>
+        <h3>Descansos</h3>
+        <div class="tabla-edit"><table id="t-desc"><thead><tr><th>Nombre</th><th>Inicio</th><th>Fin</th><th></th></tr></thead><tbody></tbody></table></div>
+        <button class="btn sec chico" type="button" data-agregar="descansos">+ Agregar descanso</button>
+        <h3>Días festivos y puentes oficiales</h3>
+        <p class="hint">Marca los que se descansan.</p>
+        <div class="festivos" id="festivos"></div>
+      </section>
+
+      <section class="card paso">
+        <h2><span class="num-paso">4</span> Eventos sociales</h2>
+        <div class="tabla-edit"><table id="t-ev"><thead><tr><th>Evento</th><th>Inicio</th><th>Fin</th><th></th></tr></thead><tbody></tbody></table></div>
+        <button class="btn sec chico" type="button" data-agregar="eventos">+ Agregar evento</button>
+      </section>
+
+      <div class="acciones fin">
+        <button class="btn grande" type="submit">Generar macrociclo</button>
+        <button class="btn sec" type="button" id="nc-reiniciar">Volver a la propuesta</button>
+      </div>
+      <p class="error" id="nc-error" hidden></p>
+    </form>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/config.js?v=1"></script>
+<script src="js/fechas.js?v=1"></script>
+<script src="js/modelo.js?v=1"></script>
+<script src="js/lector.js?v=1"></script>
+<script src="js/generador.js?v=1"></script>
+<script src="js/excel.js?v=1"></script>
+<script src="js/guardar-drive.js?v=1"></script>
+<script src="js/vista.js?v=1"></script>
+<script src="js/app.js?v=1"></script>
+</body>
+</html>
